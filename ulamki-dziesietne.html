@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ułamki dziesiętne — zadania</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brick-red:#C91A09;
+    --brick-yellow:#F2CD37;
+    --brick-blue:#0055BF;
+    --brick-green:#237841;
+    --paper:#FFFBF0;
+    --ink:#26241E;
+    --ink-soft:#5b5748;
+    --line:#e8dfc4;
+    --ok:#2E8B4E;
+    --bad:#C91A09;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Nunito',sans-serif;
+    padding-bottom:80px;
+  }
+  h1,h2,h3,.brand{font-family:'Baloo 2',sans-serif;}
+
+  /* ---------- top journey bar ---------- */
+  .journey{
+    position:sticky; top:0; z-index:50;
+    background:var(--brick-blue);
+    padding:14px 16px 18px;
+    box-shadow:0 4px 14px rgba(0,0,0,.18);
+  }
+  .journey-inner{max-width:760px;margin:0 auto;}
+  .journey-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    color:#fff; margin-bottom:8px;
+  }
+  .journey-head .brand{font-size:1.05rem; font-weight:700; letter-spacing:.2px;}
+  .journey-count{font-size:.85rem; opacity:.9;}
+  .track-wrap{position:relative; height:46px;}
+  .track{
+    position:absolute; left:0; right:0; top:26px; height:8px;
+    background:rgba(255,255,255,.28); border-radius:6px; overflow:hidden;
+  }
+  .track-fill{
+    height:100%; width:0%;
+    background:var(--brick-yellow);
+    transition:width .5s cubic-bezier(.34,1.56,.64,1);
+    border-radius:6px;
+  }
+  .figure{
+    position:absolute; top:-6px; left:0%;
+    transform:translateX(-50%);
+    transition:left .5s cubic-bezier(.34,1.56,.64,1);
+    font-size:28px; line-height:1;
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));
+  }
+  .house{
+    position:absolute; right:-6px; top:-10px;
+    font-size:30px;
+  }
+  .nom{
+    position:absolute; top:-22px;
+    transform:translateX(-50%);
+    font-size:1.1rem; opacity:0;
+    transition:opacity .4s, top .8s;
+    pointer-events:none;
+  }
+  .nom.show{opacity:1; top:-42px;}
+
+  /* ---------- layout ---------- */
+  .wrap{max-width:760px; margin:0 auto; padding:26px 16px 10px;}
+  header.page-head{margin-bottom:22px;}
+  header.page-head h1{
+    font-size:1.9rem; margin:0 0 6px; color:var(--brick-red);
+  }
+  header.page-head p{margin:0; color:var(--ink-soft); line-height:1.5;}
+  .note{
+    background:#fff; border:2px dashed var(--brick-yellow); border-radius:10px;
+    padding:10px 14px; font-size:.9rem; color:var(--ink-soft); margin-top:14px;
+  }
+
+  section.task{margin-bottom:34px;}
+  .task-head{
+    display:flex; align-items:center; gap:10px; margin-bottom:6px;
+  }
+  .task-num{
+    background:var(--brick-red); color:#fff; font-family:'Baloo 2',sans-serif;
+    font-weight:700; font-size:1.05rem; min-width:38px; height:38px;
+    border-radius:10px; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 3px 0 #8f1206;
+  }
+  .task-instruction{font-size:1.02rem; font-weight:700; color:var(--ink);}
+  .task-sub{color:var(--ink-soft); font-size:.92rem; margin:0 0 14px 48px;}
+
+  .card{
+    position:relative;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px 16px 14px 48px;
+    margin:0 0 12px 48px;
+  }
+  .card::before{
+    content:"";
+    position:absolute; left:14px; top:16px;
+    width:20px; height:20px; border-radius:50%;
+    background:var(--brick-yellow); box-shadow:0 2px 0 rgba(0,0,0,.12) inset;
+  }
+  .card::after{
+    content:attr(data-letter);
+    position:absolute; left:14px; top:16px;
+    width:20px; height:20px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2',sans-serif; font-size:.72rem; font-weight:700; color:#5c4a00;
+  }
+  .prompt{font-size:1.02rem; line-height:2; margin-bottom:8px;}
+  input.blank{
+    font-family:'Nunito',sans-serif; font-size:1rem; font-weight:700;
+    width:76px; text-align:center; padding:4px 2px;
+    border:2px solid var(--line); border-radius:7px;
+    background:#fffef8; color:var(--ink);
+  }
+  input.blank:focus{outline:none; border-color:var(--brick-blue);}
+  input.blank.ok{border-color:var(--ok); background:#eef9f0;}
+  input.blank.bad{border-color:var(--bad); background:#fdeeec;}
+
+  .card-foot{display:flex; align-items:center; gap:12px; margin-top:6px;}
+  button.check{
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:.92rem;
+    background:var(--brick-green); color:#fff; border:none;
+    padding:8px 18px; border-radius:8px; cursor:pointer;
+    box-shadow:0 3px 0 #16522f;
+  }
+  button.check:active{transform:translateY(2px); box-shadow:0 1px 0 #16522f;}
+  button.check.done{background:var(--ink-soft); box-shadow:0 3px 0 #3a382c;}
+  .feedback{font-weight:700; font-size:.92rem;}
+  .feedback.ok{color:var(--ok);}
+  .feedback.bad{color:var(--bad);}
+
+  .open-answer textarea{
+    width:100%; min-height:64px; font-family:'Nunito',sans-serif; font-size:.98rem;
+    border:2px solid var(--line); border-radius:8px; padding:8px; resize:vertical;
+  }
+  .reveal{
+    margin-top:8px; font-size:.92rem; background:#fff8dd; border-radius:8px;
+    padding:8px 10px; display:none; color:#5c4a00;
+  }
+  .reveal.show{display:block;}
+  button.reveal-btn{
+    font-family:'Nunito',sans-serif; font-weight:700; font-size:.85rem;
+    background:none; border:2px solid var(--brick-yellow); color:#5c4a00;
+    padding:5px 12px; border-radius:7px; cursor:pointer;
+  }
+
+  .frac{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 2px; line-height:1.05;}
+  .frac .num{border-bottom:2px solid var(--ink); padding:0 4px;}
+  .frac .den{padding:0 4px;}
+
+  .win{
+    display:none; text-align:center; padding:30px 16px; margin-top:10px;
+    background:linear-gradient(180deg,#fff8dd,#fff);
+    border:3px dashed var(--brick-green); border-radius:16px;
+  }
+  .win.show{display:block;}
+  .win h2{color:var(--brick-green); font-size:1.6rem; margin:6px 0;}
+  .win .big{font-size:3rem;}
+
+  @media (max-width:480px){
+    .card, .task-sub{margin-left:34px;}
+    .task-num{min-width:32px; height:32px; font-size:.9rem;}
+    .card{padding-left:40px;}
+    .card::before,.card::after{left:10px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="journey">
+  <div class="journey-inner">
+    <div class="journey-head">
+      <span class="brand">🧱 Wyprawa do domku</span>
+      <span class="journey-count"><span id="eatenCount">0</span> / <span id="totalCount">0</span> zjedzonych klocków</span>
+    </div>
+    <div class="track-wrap">
+      <div class="track"><div class="track-fill" id="trackFill"></div></div>
+      <div class="figure" id="figure">🚶</div>
+      <span class="nom" id="nom">🍬</span>
+      <div class="house">🏠</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>Ułamki dziesiętne</h1>
+    <p>Rozwiąż zadania po kolei. Po każdej sprawdzonej odpowiedzi ludzik robi krok w stronę domku i zjada jednego klocka. Kiedy dotrze na miejsce — koniec ćwiczeń!</p>
+    <div class="note">
+      Uwaga: w tym zestawie pominięto zadanie 22 (mierzenie linijką długości szpilki, gwoździa i śrubki) oraz zadania 14 i 17 — opierają się one na dokładnym odczycie z obrazka (oś liczbowa, zdjęcia monet), którego nie da się wiernie odtworzyć w formie tekstowej. Zadanie 15 (rysowanie osi liczbowej) zamieniono na ustawianie liczb w kolejności rosnącej — sprawdza tę samą umiejętność, tylko w formie, którą można sprawdzić na ekranie.
+    </div>
+  </header>
+
+  <div id="tasks"></div>
+
+  <div class="win" id="winBox">
+    <div class="big">🏠🎉</div>
+    <h2>Dotarłeś do domku!</h2>
+    <p>Wszystkie zadania zaznaczone jako rozwiązane. Świetna robota!</p>
+  </div>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const F = (n,d) => `<span class="frac"><span class="num">${n}</span><span class="den">${d}</span></span>`;
+
+const TASKS = [
+  { num:13, instruction:'Zapisz podane liczby, używając przecinka.', items:[
+    {label:'a', template:`${F(5,2)} = %%`, answers:['2,5']},
+    {label:'b', template:`${F(33,5)} = %%`, answers:['6,6']},
+    {label:'c', template:`${F(9,4)} = %%`, answers:['2,25']},
+    {label:'d', template:`${F(88,50)} = %%`, answers:['1,76']},
+    {label:'e', template:`3 ${F(1,25)} = %%`, answers:['3,04']},
+    {label:'f', template:`7 ${F(13,50)} = %%`, answers:['7,26']},
+  ]},
+  { num:15, instruction:'Zapisz podane liczby w kolejności rosnącej — tak, jak zaznaczyłbyś/zaznaczyłabyś je na osi liczbowej, od lewej do prawej.', items:[
+    {label:'a', template:`Liczby: 0,5 &nbsp; 1,8 &nbsp; 2,1 &nbsp; 0,9 &nbsp; 1,7<br>Kolejność rosnąca: %% , %% , %% , %% , %%`,
+      answers:['0,5','0,9','1,7','1,8','2,1']},
+    {label:'b', template:`Liczby: 0,12 &nbsp; 0,05 &nbsp; 0,17 &nbsp; 0,01 &nbsp; 0,21<br>Kolejność rosnąca: %% , %% , %% , %% , %%`,
+      answers:['0,01','0,05','0,12','0,17','0,21']},
+  ]},
+  { num:16, instruction:'Jakimi cyframi należy zastąpić kwadraciki?', items:[
+    {label:'a', template:`2,5 to %% jedności i %% dziesiątych`, answers:['2','5']},
+    {label:'b', template:`5,32 to %% jedności, %% dziesiąte i %% setne`, answers:['5','3','2']},
+    {label:'c', template:`2,803 to %% jedności, %% dziesiątych, %% setnych i %% tysięczne`, answers:['2','8','0','3']},
+  ]},
+  { num:18, instruction:'Przepisz do zeszytu i uzupełnij:', items:[
+    {label:'a', template:`13,87 zł = %% zł %% gr`, answers:['13','87']},
+    {label:'b', template:`120,56 zł = %% zł %% gr`, answers:['120','56']},
+    {label:'c', template:`40,20 zł = %% zł %% gr`, answers:['40','20']},
+    {label:'d', template:`5,09 zł = %% zł %% gr`, answers:['5','9']},
+  ]},
+  { num:19, instruction:'Zastąp kwadraciki odpowiednimi liczbami.', items:[
+    {label:'a', template:`20 zł 15 gr = %% zł = %% gr`, answers:['20,15','2015']},
+    {label:'b', template:`170 zł 80 gr = %% zł = %% gr`, answers:['170,8','17080']},
+    {label:'c', template:`9 zł 3 gr = %% zł = %% gr`, answers:['9,03','903']},
+    {label:'d', template:`30 zł 7 gr = %% zł = %% gr`, answers:['30,07','3007']},
+  ]},
+  { num:20, instruction:'W pewnej szkole przeprowadzono akcję „Góra groszy”. Zebrano 23 691 jednogroszówek, 3542 dwugroszówki i 345 pięciogroszówek. Ile złotych zebrano?', items:[
+    {label:'', template:`Zebrano %% zł`, answers:['325']},
+  ]},
+  { num:21, instruction:'Ustal, na ile sposobów można zebrać monetami 50 gr i 2 gr podaną kwotę.', items:[
+    {label:'a', template:`0,22 zł — na %% sposobów`, answers:['1']},
+    {label:'b', template:`0,60 zł — na %% sposobów`, answers:['2']},
+    {label:'c', template:`2,04 zł — na %% sposobów`, answers:['5']},
+    {label:'d', template:`3,54 zł — na %% sposobów`, answers:['8']},
+  ]},
+  { num:23, instruction:'Wyraź podane długości:', items:[
+    {label:'a — w centymetrach', template:`20 mm = %% cm &nbsp;&nbsp; 2 cm 6 mm = %% cm &nbsp;&nbsp; 9 mm = %% cm &nbsp;&nbsp; 123 mm = %% cm`,
+      answers:['2','2,6','0,9','12,3']},
+    {label:'b — w decymetrach', template:`2 cm = %% dm &nbsp;&nbsp; 1 dm 2 cm = %% dm &nbsp;&nbsp; 25 cm = %% dm &nbsp;&nbsp; 5 m = %% dm &nbsp;&nbsp; 7,5 m = %% dm`,
+      answers:['0,2','1,2','2,5','50','75']},
+    {label:'c — w metrach', template:`35 cm = %% m &nbsp;&nbsp; 2 m 56 cm = %% m &nbsp;&nbsp; 1 m 8 cm = %% m &nbsp;&nbsp; 1 km 50 m = %% m`,
+      answers:['0,35','2,56','1,08','1050']},
+    {label:'d — w kilometrach', template:`402 m = %% km &nbsp;&nbsp; 5 km 308 m = %% km &nbsp;&nbsp; 10 km 25 m = %% km &nbsp;&nbsp; 1 km 9 m = %% km`,
+      answers:['0,402','5,308','10,025','1,009']},
+  ]},
+  { num:24, instruction:'Zapisz w postaci wyrażenia dwumianowanego.', items:[
+    {label:'a', template:`8,3 cm = %% cm %% mm`, answers:['8','3']},
+    {label:'b', template:`9,6 cm = %% cm %% mm`, answers:['9','6']},
+    {label:'c', template:`18,3 dm = %% dm %% cm`, answers:['18','3']},
+    {label:'d', template:`5,7 dm = %% dm %% cm`, answers:['5','7']},
+    {label:'e', template:`25,58 m = %% m %% cm`, answers:['25','58']},
+    {label:'f', template:`2,09 m = %% m %% cm`, answers:['2','9']},
+    {label:'g', template:`35,830 km = %% km %% m`, answers:['35','830']},
+    {label:'h', template:`6,055 km = %% km %% m`, answers:['6','55']},
+  ]},
+  { num:25, instruction:'Zapisz w postaci wyrażenia dwumianowanego.', items:[
+    {label:'a', template:`856 cm = %% m %% cm`, answers:['8','56']},
+    {label:'b', template:`1527 cm = %% m %% cm`, answers:['15','27']},
+    {label:'c', template:`1256 m = %% km %% m`, answers:['1','256']},
+    {label:'d', template:`89 560 m = %% km %% m`, answers:['89','560']},
+  ]},
+  { num:26, instruction:'W 1974 roku w Angoli napotkano słonia o ogromnych wymiarach. Jego wysokość wynosiła 4,16 m, długość od końca trąby do końca ogona — 10,67 m, a obwód stopy — 1,82 m. Zapisz te dane, używając wyrażeń dwumianowanych.', items:[
+    {label:'wysokość', template:`4,16 m = %% m %% cm`, answers:['4','16']},
+    {label:'długość', template:`10,67 m = %% m %% cm`, answers:['10','67']},
+    {label:'obwód stopy', template:`1,82 m = %% m %% cm`, answers:['1','82']},
+  ]},
+  { num:27, instruction:'Korzystając z równości 1 g = 0,1 dag, zapisz masy trzech nietoperzy za pomocą ułamków dziesiętnych.', items:[
+    {label:'nocek ostrouchy (2 dag 5 g)', template:`= %% dag`, answers:['2,5']},
+    {label:'mroczek pozłocisty (1 dag 3 g)', template:`= %% dag`, answers:['1,3']},
+    {label:'borowiec wielki (3 dag 7 g)', template:`= %% dag`, answers:['3,7']},
+  ]},
+  { num:28, instruction:'Wyraź podane masy:', items:[
+    {label:'a — w dekagramach', template:`7 g = %% dag &nbsp;&nbsp; 2 dag 6 g = %% dag &nbsp;&nbsp; 58 g = %% dag &nbsp;&nbsp; 107 g = %% dag`,
+      answers:['0,7','2,6','5,8','10,7']},
+    {label:'b — w kilogramach', template:`51 dag = %% kg &nbsp;&nbsp; 4 kg 9 dag = %% kg &nbsp;&nbsp; 605 g = %% kg &nbsp;&nbsp; 3 kg 25 dag = %% kg`,
+      answers:['0,51','4,09','0,605','3,25']},
+    {label:'c — w tonach', template:`223 kg = %% t &nbsp;&nbsp; 6 t 505 kg = %% t &nbsp;&nbsp; 10 t 80 kg = %% t &nbsp;&nbsp; 1 t 9 kg = %% t`,
+      answers:['0,223','6,505','10,08','1,009']},
+  ]},
+  { num:29, instruction:'Zapisz w postaci wyrażenia dwumianowanego.', items:[
+    {label:'a', template:`2,3 dag = %% dag %% g`, answers:['2','3']},
+    {label:'b', template:`4,52 kg = %% kg %% dag`, answers:['4','52']},
+    {label:'c', template:`6,08 kg = %% kg %% dag`, answers:['6','8']},
+    {label:'d', template:`1,297 kg = %% kg %% g`, answers:['1','297']},
+    {label:'e', template:`6,035 kg = %% kg %% g`, answers:['6','35']},
+    {label:'f', template:`3,004 kg = %% kg %% g`, answers:['3','4']},
+    {label:'g', template:`10,899 t = %% t %% kg`, answers:['10','899']},
+    {label:'h', template:`1,067 t = %% t %% kg`, answers:['1','67']},
+  ]},
+  { num:30, instruction:'Zapisz w postaci wyrażenia dwumianowanego.', items:[
+    {label:'a', template:`45 g = %% dag %% g`, answers:['4','5']},
+    {label:'b', template:`749 g = %% dag %% g`, answers:['74','9']},
+    {label:'c', template:`8025 g = %% dag %% g`, answers:['802','5']},
+    {label:'d', template:`2038 g = %% dag %% g`, answers:['203','8']},
+    {label:'e', template:`273 dag = %% kg %% dag`, answers:['2','73']},
+    {label:'f', template:`4085 dag = %% kg %% dag`, answers:['40','85']},
+    {label:'g', template:`2075 kg = %% t %% kg`, answers:['2','75']},
+    {label:'h', template:`70 008 kg = %% t %% kg`, answers:['70','8']},
+  ]},
+  { num:32, instruction:'Zapisz podane liczby, pomijając niepotrzebne zera.', items:[
+    {label:'a', template:`0,370 = %%`, answers:['0,37']},
+    {label:'b', template:`0,070 = %%`, answers:['0,07']},
+    {label:'c', template:`20,0500 = %%`, answers:['20,05']},
+    {label:'d', template:`0,30200 = %%`, answers:['0,302']},
+  ]},
+];
+
+const OPEN_TASK = {
+  num:31,
+  instruction:'Jeden z największych znalezionych bursztynów nosi nazwę Burma Amber i znajduje się w Muzeum Historii Naturalnej w Londynie. Jego waga wynosi 15,25 kg. Wyraź masę tego bursztynu czterema innymi sposobami.',
+  reveal:'Np.: 15 kg 250 g = 15 250 g = 1525 dag = 0,01525 t'
+};
+
+/* ---------------- RENDER ---------------- */
+const tasksEl = document.getElementById('tasks');
+let totalQuestions = 0;
+let answeredIds = new Set();
+
+function numEq(a,b){
+  const pa = parseFloat(String(a).trim().replace(',', '.'));
+  const pb = parseFloat(String(b).trim().replace(',', '.'));
+  if (isNaN(pa) || isNaN(pb)) return false;
+  return Math.abs(pa-pb) < 0.0001;
+}
+
+TASKS.forEach(task=>{
+  const section = document.createElement('section');
+  section.className = 'task';
+  section.innerHTML = `
+    <div class="task-head">
+      <div class="task-num">${task.num}</div>
+      <div class="task-instruction">${task.instruction}</div>
+    </div>
+  `;
+  task.items.forEach((item, i)=>{
+    const qid = `t${task.num}-${i}`;
+    totalQuestions++;
+    let inputCount = 0;
+    const html = item.template.replace(/%%/g, ()=>{
+      const b = inputCount++;
+      return `<input type="text" class="blank" data-qid="${qid}" data-bidx="${b}" inputmode="text">`;
+    });
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.letter = item.label ? item.label.split(' ')[0] : '';
+    card.innerHTML = `
+      ${item.label ? `<div class="task-sub" style="margin:0 0 6px 0;font-weight:700;color:var(--ink-soft);">${item.label}</div>` : ''}
+      <div class="prompt">${html}</div>
+      <div class="card-foot">
+        <button class="check" data-qid="${qid}">Sprawdź</button>
+        <span class="feedback" data-qid="${qid}"></span>
+      </div>
+    `;
+    section.appendChild(card);
+
+    card.querySelector('.check').addEventListener('click', ()=>checkQuestion(qid, item.answers, card));
+    card.querySelectorAll('input.blank').forEach(inp=>{
+      inp.addEventListener('keydown', e=>{
+        if(e.key==='Enter'){ checkQuestion(qid, item.answers, card); }
+      });
+    });
+  });
+  tasksEl.appendChild(section);
+});
+
+// open task 31
+totalQuestions++;
+const openSection = document.createElement('section');
+openSection.className = 'task';
+openSection.innerHTML = `
+  <div class="task-head">
+    <div class="task-num">${OPEN_TASK.num}</div>
+    <div class="task-instruction">${OPEN_TASK.instruction}</div>
+  </div>
+  <div class="card" data-letter="">
+    <div class="open-answer">
+      <textarea placeholder="Wpisz tutaj cztery różne zapisy tej masy..." id="openInput"></textarea>
+    </div>
+    <div class="card-foot">
+      <button class="check" id="openCheck">Zaliczam</button>
+      <button class="reveal-btn" id="openReveal">Pokaż przykładową odpowiedź</button>
+    </div>
+    <div class="reveal" id="openRevealBox">${OPEN_TASK.reveal}</div>
+  </div>
+`;
+tasksEl.appendChild(openSection);
+document.getElementById('openReveal').addEventListener('click', ()=>{
+  document.getElementById('openRevealBox').classList.toggle('show');
+});
+document.getElementById('openCheck').addEventListener('click', ()=>{
+  const btn = document.getElementById('openCheck');
+  if (answeredIds.has('open31')) return;
+  answeredIds.add('open31');
+  btn.textContent = 'Zaliczone ✓';
+  btn.classList.add('done');
+  advance();
+});
+
+document.getElementById('totalCount').textContent = totalQuestions;
+
+/* ---------------- CHECKING ---------------- */
+function checkQuestion(qid, answers, card){
+  const inputs = card.querySelectorAll(`input.blank[data-qid="${qid}"]`);
+  let allCorrect = true;
+  inputs.forEach((inp, idx)=>{
+    const correct = numEq(inp.value, answers[idx]);
+    inp.classList.remove('ok','bad');
+    inp.classList.add(correct ? 'ok' : 'bad');
+    if(!correct) allCorrect = false;
+  });
+  const fb = card.querySelector(`.feedback[data-qid="${qid}"]`);
+  fb.textContent = allCorrect ? 'Dobrze! ✓' : 'Sprawdź jeszcze raz — coś tu nie gra.';
+  fb.className = 'feedback ' + (allCorrect ? 'ok' : 'bad');
+
+  if(!answeredIds.has(qid)){
+    answeredIds.add(qid);
+    const btn = card.querySelector(`.check[data-qid="${qid}"]`);
+    btn.classList.add('done');
+    advance();
+  }
+}
+
+/* ---------------- PROGRESS / LEGO JOURNEY ---------------- */
+const FOODS = ['🍬','🍪','🍭','🍎','🍇','🧁'];
+function advance(){
+  const pct = Math.min(100, (answeredIds.size / totalQuestions) * 100);
+  document.getElementById('trackFill').style.width = pct + '%';
+  document.getElementById('figure').style.left = pct + '%';
+  document.getElementById('eatenCount').textContent = answeredIds.size;
+
+  const nom = document.getElementById('nom');
+  nom.textContent = FOODS[answeredIds.size % FOODS.length];
+  nom.style.left = pct + '%';
+  nom.classList.remove('show');
+  void nom.offsetWidth;
+  nom.classList.add('show');
+  setTimeout(()=>nom.classList.remove('show'), 700);
+
+  saveProgress();
+
+  if(answeredIds.size >= totalQuestions){
+    document.getElementById('winBox').classList.add('show');
+    document.getElementById('figure').textContent = '🎉';
+  }
+}
+
+/* ---------------- SAVE / LOAD PROGRESS ---------------- */
+const STORAGE_KEY = 'ulamki-dziesietne-progress';
+function saveProgress(){
+  try{
+    const data = { answered: Array.from(answeredIds), values: {} };
+    document.querySelectorAll('input.blank').forEach(inp=>{
+      if(inp.classList.contains('ok')) data.values[`${inp.dataset.qid}-${inp.dataset.bidx}`] = inp.value;
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }catch(e){}
+}
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    (data.answered||[]).forEach(qid=>{
+      if(qid === 'open31'){
+        document.getElementById('openCheck').click();
+        return;
+      }
+      const inputs = document.querySelectorAll(`input.blank[data-qid="${qid}"]`);
+      if(!inputs.length) return;
+      inputs.forEach(inp=>{
+        const key = `${inp.dataset.qid}-${inp.dataset.bidx}`;
+        if(data.values && data.values[key] !== undefined) inp.value = data.values[key];
+      });
+      const card = inputs[0].closest('.card');
+      const answers = [];
+      TASKS.forEach(t=>t.items.forEach((it,i)=>{ if(`t${t.num}-${i}` === qid) answers.push(...it.answers); }));
+      checkQuestion(qid, answers, card);
+    });
+  }catch(e){}
+}
+loadProgress();
+
+const resetBtn = document.createElement('button');
+resetBtn.textContent = '↺ Zacznij od nowa';
+resetBtn.className = 'reveal-btn';
+resetBtn.style.marginTop = '10px';
+resetBtn.addEventListener('click', ()=>{
+  if(confirm('Na pewno wyzerować cały postęp?')){
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+});
+document.querySelector('header.page-head').appendChild(resetBtn);
+</script>
+</body>
+</html>
